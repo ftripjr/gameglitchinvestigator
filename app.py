@@ -1,6 +1,7 @@
 import random
 import streamlit as st
 
+# FIXME: Correct Ranges for difficulty and default behavior
 def get_range_for_difficulty(difficulty: str):
     if difficulty == "Easy":
         return 1, 20
@@ -28,7 +29,7 @@ def parse_guess(raw: str):
 
     return True, value, None
 
-
+# FIXME: Guess give hints in the wrong direction
 def check_guess(guess, secret):
     if guess == secret:
         return "Win", "🎉 Correct!"
@@ -46,7 +47,7 @@ def check_guess(guess, secret):
             return "Too High", "📈 Go HIGHER!"
         return "Too Low", "📉 Go LOWER!"
 
-
+# FIXME: Correct scoring logic. Score should be 100 if first attempt is correct. Score should never be negative.
 def update_score(current_score: int, outcome: str, attempt_number: int):
     if outcome == "Win":
         points = 100 - 10 * (attempt_number + 1)
@@ -77,6 +78,7 @@ difficulty = st.sidebar.selectbox(
     index=1,
 )
 
+# FIXME: Correct Attempt Limit for difficulty and default behavior
 attempt_limit_map = {
     "Easy": 6,
     "Normal": 8,
@@ -92,6 +94,7 @@ st.sidebar.caption(f"Attempts allowed: {attempt_limit}")
 if "secret" not in st.session_state:
     st.session_state.secret = random.randint(low, high)
 
+# FIXME: Incorrect Attempts at app start
 if "attempts" not in st.session_state:
     st.session_state.attempts = 1
 
@@ -106,8 +109,9 @@ if "history" not in st.session_state:
 
 st.subheader("Make a guess")
 
+# FIXME: Hard coded range for info. Should show low and high.
 st.info(
-    f"Guess a number between 1 and 100. "
+    f"Guess a number between {low} and {high}. "
     f"Attempts left: {attempt_limit - st.session_state.attempts}"
 )
 
@@ -131,6 +135,7 @@ with col2:
 with col3:
     show_hint = st.checkbox("Show hint", value=True)
 
+# FIXME: New Game doesn't start new game. Make sure it takes into account selected difficulty
 if new_game:
     st.session_state.attempts = 0
     st.session_state.secret = random.randint(1, 100)

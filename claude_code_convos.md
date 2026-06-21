@@ -1,12 +1,186 @@
 # Claude Code Convos
 
-Here are the logs of my Claude Code sessions for each bug fix.
+Here are the logs of my Claude Code sessions for each bug fix. I marked the "crime scenes" in the code with  `# FIXME: Logic breaks here` tags where I thought the logic may be incorrect and need fixing.
 
-## The Hints, They Lie
+# Rough Start with a Wasted Guess 🫤❔
 
-## We Got Range(s)
+The app starts attempts for the game at 1 instead of 0. Why?
+Read d:\ftripjr.dev\CodePath-Summer-2026\AI110\tinker_labs\game-glitch-investigator\app.py
+Line 99 initializes attempts to 1 instead of 0. Then line 153 increments it before processing the guess, so first submission jumps to 2.
 
-## GAME OVER
+Should be:
+
+
+st.session_state.attempts = 0
+Off-by-one bug. Code's already marked it (line 97 FIXME comment).
+
+# Stale Info ❗
+
+FT: Info block does not accurately show range based on difficulty selection. `1 to 100` is hard coded. How can I ensure the info block updates based on the selected difficulty of the game?
+
+CC: `Read game-glitch-investigator\investigate-and-repair.md`
+`Read game-glitch-investigator\app.py`
+
+Line 113-116 has hardcoded 1 and 100 in info block. Already computed low, high on line 89 — use those:
+
+`Edit game-glitch-investigator\app.py`
+- `Modified`
+
+```py
+st.info(
+    f"Guess a number between {low} and {high}. "
+    f"Attempts left: {attempt_limit - st.session_state.attempts}"
+)
+```
+
+`Edit game-glitch-investigator\investigate-and-repair.md`
+- `Modified`
+
+Done. Info block now shows {low} and {high} instead of hardcoded 1 and 100. Pulls from difficulty via get_range_for_difficulty().
+
+FT: "What are possible side effects of this change?"
+
+CC: "Info block now matches sidebar range display—consistent, intended.
+
+Latent issue exposed: "New Game" button (line 141) still hardcodes random.randint(1, 100). Doesn't respect current difficulty. User changes to "Hard" (1-50 range), clicks "New Game", gets secret from 1-100. Info says "1-50", secret may be outside it.
+
+Mid-game difficulty switch: If user changes difficulty slider while playing, next guess shows new range but secret was generated from old range. Unlikely (sidebar separate from game state) but possible confusing state.
+
+Fix #1 (New Game): Line 141 should use random.randint(low, high) with difficulty. Already marked FIXME line 138.
+
+Fix #2 (mid-game switch): Generate secret only once per game, or reset game when difficulty changes—depends on intended design."
+
+FT: "Intended design would be generate secret only once per game. Difficulty should change only when new game button is pressed."
+
+CC: "Understood. Then "New Game" button fix is priority:
+
+Line 141 must use current difficulty range, not hardcoded 1-100:
+
+
+if new_game:
+    st.session_state.attempts = 0
+    st.session_state.secret = random.randint(low, high)
+    st.success("New game started.")
+    st.rerun()
+
+low, high already computed on line 89 with current difficulty. Fix aligns with design: new game respects selected difficulty.
+
+Mid-game difficulty slider changes won't affect current secret (already generated), so no issue.
+
+Want me to apply this fix?"
+
+## The Hints, They Lie 😈
+
+FT: "The hints in this code tell the player to go lower when the secret is higher than the guess and to go higher when the secret is lower than the guess. Why is this?"
+
+Read d:\ftripjr.dev\CodePath-Summer-2026\AI110\tinker_labs\game-glitch-investigator\app.py
+
+CC: "Bug! Hints inverted.
+
+When guess > secret (line 38), player guessed too high → code says "Go HIGHER!" (line 39). Wrong direction.
+
+When guess < secret (line 40), player guessed too low → code says "Go LOWER!" (line 41). Wrong direction.
+
+Should be:
+
+guess > secret → "Go LOWER"
+guess < secret → "Go HIGHER"
+Line 32 marks it: # FIXME: Guess give hints in the wrong direction
+
+This is one of the glitches in the game for you to fix."
+
+## Range Mix-Up 🌀
+
+d:\ftripjr.dev\CodePath-Summer-2026\AI110\tinker_labs\game-glitch-investigator\app.py
+Ranges and attempt limits are not consistent with difficulty. The easier difficulty should have the most guesses and the smallest range while the hardest difficult has the least attempts and the largest range. How can I correct this?
+Read d:\ftripjr.dev\CodePath-Summer-2026\AI110\tinker_labs\game-glitch-investigator\app.py
+Problem clear. Current state backwards:
+
+Easy: Range 1-20, Attempts 6 ✓
+
+Normal: Range 1-100, Attempts 8 ✓
+
+Hard: Range 1-50, Attempts 5 ✗ (range too small)
+
+Hard should have largest range, fewest attempts. Fix:
+
+
+def get_range_for_difficulty(difficulty: str):
+    if difficulty == "Easy":
+        return 1, 20
+    if difficulty == "Normal":
+        return 1, 100
+    if difficulty == "Hard":
+        return 1, 500  # or 200, much larger
+    return 1, 100
+
+attempt_limit_map = {
+    "Easy": 10,      # or 8, most generous
+    "Normal": 8,
+    "Hard": 4,       # or 5, least generous
+}
+Pattern: Difficulty increases = Range grows, Attempts shrink. Make swap in lines 5-12 and 82-86?
+
+Oh and the default behavior should match that of the expected normal difficulty
+Correct. New Game button (lines 140-141) hardcodes 1-100 range and ignores difficulty. Fix:
+
+
+if new_game:
+    st.session_state.attempts = 0
+    low, high = get_range_for_difficulty(difficulty)
+    st.session_state.secret = random.randint(low, high)
+    st.success("New game started.")
+    st.rerun()
+Also fix line 99 (attempt initialization):
+
+
+if "attempts" not in st.session_state:
+    st.session_state.attempts = 0  # not 1
+And line 114 (info message hardcodes range):
+
+
+st.info(
+    f"Guess a number between {low} and {high}. "
+    f"Attempts left: {attempt_limit - st.session_state.attempts}"
+)
+Want me to apply these?
+
+d#5-5
+No
+Got it. Ready when needed.
+
+## GAME OVER. Forever. 👾
+
+FT: "Currently, the new game button doesn't work after a game has been completed with a win. How would I ensure the new game button can reset the state of the app to start a new game after a win. Make sure this works for a game where the player loses, too."
+
+`Read game-glitch-investigator\app.py`
+
+CC: "Bug found. New Game button resets attempts/secret but not status. When status is "won" or "lost", lines 145-150 execute st.stop(), blocking button interaction. Also, line 141 hardcodes range instead of using difficulty.
+
+Fix: Reset status to "playing" and use low, high from difficulty.
+
+```python
+# FIXME: New Game doesn't start new game. Make sure it takes into account selected difficulty
+if new_game:
+    st.session_state.attempts = 0
+    st.session_state.status = "playing"
+    st.session_state.secret = random.randint(low, high)
+    st.success("New game started.")
+    st.rerun()
+```
+
+FT: "what side effects could occur from this change?"
+
+CC: "Side effects to consider:
+
+Score not reset: Score carries over to the new game. User might expect fresh score each game, or might want cumulative scoring across games. Need to clarify intent.
+
+History not cleared: Old guesses from previous game remain in st.session_state.history. New game should probably have blank history.
+
+Attempts inconsistency: Initial state sets attempts to 1 (line 99), but new game resets to 0. Both lead to same behavior (first guess = attempt 1 after increment), but it's inconsistent state. Worth checking if initial attempts should also be 0.
+
+Which of these matter for your game?
+"
 
 ## We Got History
 
