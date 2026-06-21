@@ -72,6 +72,21 @@ So the bugs appear to be:
 - Give one example of an AI suggestion that was correct (including what the AI suggested and how you verified the result).
 - Give one example of an AI suggestion that was incorrect or misleading (including what the AI suggested and how you verified the result).
 
+I used Claude Code to help me fix the following glitches:
+
+Required:
+
+- [ ] Hints lie
+- [ ] Ranges and Guesses are not consistent with difficulty
+- [ ] Banner for attempts and range based on difficulty does not update
+
+Stretch Goal:
+- [ ] new game button does not appear to properly create new games
+  - [ ] will not allow a new game to begin after a game has been completed
+  - [ ] on successful game generation, range does not update based on difficulty
+  - [ ] history not cleared
+- [ ] History doesn't properly update on guess submission
+
 ---
 
 ## 3. Debugging and testing your fixes

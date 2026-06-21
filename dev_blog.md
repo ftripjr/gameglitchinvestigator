@@ -201,3 +201,21 @@ After checking the sanity check video, I'll see what errors I should have seen.
 - Hard range is smaller than the normal range. I didn't even consider that because it had more guesses. I figured if it had less guesses the smaller range was decent enough, but it does make sense that the harder one would have a larger range to guess. That would lead me to believe that the number of guesses should decrease AND the range should increase with higher difficulty.
 
 That will be the end of my glitch hunt for now.I've got plenty to work with. I'll update the blog with the next step in the lab. Investigation!
+
+## Blog #2 - Claude PLEASE HELP!
+
+After finishing Phase 1
+
+Quick Note! Here's the [Fundamental concepts of Streamlit](https://docs.streamlit.io/get-started/fundamentals) I'll probably be using these alongside Claude Code with testing.
+
+After compiling my list of bugs, I asked handy-dandy Claude Code where I should look to find answers to the history glitch and to explain the logic of its current implementation.
+
+Claude Code was an eager little dev and found 3 bugs to fix!
+
+1) Invalid guesses increment attempts - This is not something I think I noticed. I'll have to test again to verify this.
+2) History is not reset on new game - This is what I told it to do, so glad it can repeat what I said.
+3) It noticed that attempts was starting at 1 instead of 0, something I would've asked just to sanity check Claude Code. Good job on that early fix!
+
+Asking it to explain the logic of these bugs, it gave me the following rationales.
+
+<!-- TODO Add rationales -->
