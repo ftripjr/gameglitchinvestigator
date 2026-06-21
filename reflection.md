@@ -4,13 +4,9 @@ Answer each question in 3 to 5 sentences. Be specific and honest about what actu
 
 ## 1. What was broken when you started?
 
-- What did the game look like the first time you ran it?
-- List at least two concrete bugs you noticed at the start  
-  (for example: "the hints were backwards").
-
 The game had a few incorrect implementations for the game's logic and UI. On app startup, the attempts count was incorrect, starting at 1 instead of 0. After running the application, the hints logic was somehow inverted, telling the user to go lower when the value of the secret was higher than the guess and vice versa. The history that tracks user guesses also does not update on submission of a guess. The difficulty selection was broken as no new games followed the suggested ranges for easy or hard difficulty. The UI also never should correct ranges for those difficulties.
 
-Also something I noticed after peer review, the ranges are larger in normal than for hard. That should probably change!
+Also something I noticed after peer review, the ranges are larger in normal than for hard and the guesses don't seem to be consistent based on difficulty. That should probably change!
 
 **Bug Reproduction Log**
 
@@ -58,14 +54,15 @@ So the bugs appear to be:
 - [ ] Hints lie
 - [ ] Banner for attempts and range based on difficulty does not update
 - [ ] History doesn't properly update on guess submission
-- [ ] Range for hard and normal are swapped.
+- [ ] Ranges and Guesses are not consistent with difficulty
+  - [ ] Easy -> Smallest Range (1,20), Most Guesses (8)
+  - [ ] Normal -> Medium Range (1,50), "Normal" Guesses (6)
+  - [ ] Hard -> Largest Range (1,100), Least Guesses (5)
 - [ ] Score System is bugged.
 - [ ] new game button does not appear to properly create new games
   - [ ] history not cleared
   - [ ] will not allow a new game to begin after a game has been completed
   - [ ] on successful game generation, range does not update based on difficulty
-
-
 
 ---
 

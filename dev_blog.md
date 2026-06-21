@@ -196,7 +196,8 @@ Found a good amount of bugs to test.
 - [ ] Score System is bugged.
 
 After checking the sanity check video, I'll see what errors I should have seen.
+
 - Hints wrong
-- Hard range is smaller than the normal range. I didn't even consider that because it had more guesses. I figured if it had less guesses the smaller range was decent enough, but it does make sense that the harder one would have a larger range to guess.
+- Hard range is smaller than the normal range. I didn't even consider that because it had more guesses. I figured if it had less guesses the smaller range was decent enough, but it does make sense that the harder one would have a larger range to guess. That would lead me to believe that the number of guesses should decrease AND the range should increase with higher difficulty.
 
 That will be the end of my glitch hunt for now.I've got plenty to work with. I'll update the blog with the next step in the lab. Investigation!
