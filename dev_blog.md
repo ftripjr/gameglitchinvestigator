@@ -202,20 +202,10 @@ After checking the sanity check video, I'll see what errors I should have seen.
 
 That will be the end of my glitch hunt for now.I've got plenty to work with. I'll update the blog with the next step in the lab. Investigation!
 
-## Blog #2 - Claude PLEASE HELP!
+## Blog #2 - Claude PLEASE HELP! 😭
 
-After finishing Phase 1
+After finishing Phase 1, I been feeling a bit weird with coding alongside Claude Code. I feel like I should just be a better reader of documentation. But as I worked with the tool late into the night and got familiar with how to prompt effectively and what context I should provide, I felt way better about fixing, validating, and verifying my code for this lab.
 
-Quick Note! Here's the [Fundamental concepts of Streamlit](https://docs.streamlit.io/get-started/fundamentals) I'll probably be using these alongside Claude Code with testing.
+I feel like looking through [my Claude Code Conversations](claude_code_convos.md), you can see my willingness to test with the coding assistant increase. While I still don't give it full decision making, it does help me bounce my ideas and re-inforce my understanding of things I don't know. 
 
-After compiling my list of bugs, I asked handy-dandy Claude Code where I should look to find answers to the history glitch and to explain the logic of its current implementation.
-
-Claude Code was an eager little dev and found 3 bugs to fix!
-
-1) Invalid guesses increment attempts - This is not something I think I noticed. I'll have to test again to verify this.
-2) History is not reset on new game - This is what I told it to do, so glad it can repeat what I said.
-3) It noticed that attempts was starting at 1 instead of 0, something I would've asked just to sanity check Claude Code. Good job on that early fix!
-
-Asking it to explain the logic of these bugs, it gave me the following rationales.
-
-<!-- TODO Add rationales -->
+I do like to test the agent and see if it truly does know how to put code together by 

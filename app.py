@@ -1,57 +1,13 @@
 import random
 import streamlit as st
 
-def get_range_for_difficulty(difficulty: str):
-    if difficulty == "Easy":
-        return 1, 20
-    if difficulty == "Normal":
-        return 1, 50 # Claude Code wants this set to 100. I could work with this but will work with 50 for now.
-    if difficulty == "Hard":
-        return 1, 100 # Claude Code wants this set to 500 or 200. A bit excessive in my opinion, but I like the energy.
-    return 1, 50
-
-def parse_guess(raw: str):
-    if raw is None:
-        return False, None, "Enter a guess."
-
-    if raw == "":
-        return False, None, "Enter a guess."
-
-    try:
-        if "." in raw:
-            value = int(float(raw))
-        else:
-            value = int(raw)
-    except Exception:
-        return False, None, "That is not a number."
-
-    return True, value, None
-
-def check_guess(guess, secret):
-    if guess == secret:
-        return "Win", "🎉 Correct!"
-    elif guess > secret:
-        return "Too High", "📉 Go LOWER!"
-    else:
-        return "Too Low", "📈 Go HIGHER!"
-
-# FIXME: Correct scoring logic. Score should be 100 if first attempt is correct. Score should never be negative.
-def update_score(current_score: int, outcome: str, attempt_number: int):
-    if outcome == "Win":
-        points = 100 - 10 * (attempt_number + 1)
-        if points < 10:
-            points = 10
-        return current_score + points
-
-    if outcome == "Too High":
-        if attempt_number % 2 == 0:
-            return current_score + 5
-        return current_score - 5
-
-    if outcome == "Too Low":
-        return current_score - 5
-
-    return current_score
+#FIX: Refactored logic into logic_utils.py using agent mode
+from logic_utils import (
+    get_range_for_difficulty,
+    parse_guess,
+    check_guess,
+    update_score
+)
 
 st.set_page_config(page_title="Glitchy Guesser", page_icon="🎮")
 
@@ -66,6 +22,7 @@ difficulty = st.sidebar.selectbox(
     index=1,
 )
 
+# FIX: Updating low, high, and secret states here based on selected difficulty at this moment. Recommended from using agent mode
 attempt_limit_map = {
     "Easy": 10,
     "Normal": 8,
@@ -91,7 +48,7 @@ if "secret" not in st.session_state:
     st.session_state.secret = random.randint(low, high)
 
 if "attempts" not in st.session_state:
-    st.session_state.attempts = 0 
+    st.session_state.attempts = 0   # FIX: corrected starting value using agent mode
 
 if "score" not in st.session_state:
     st.session_state.score = 0
@@ -132,12 +89,11 @@ with col3:
 if new_game:
     st.session_state.status = "playing"
 
-    # Claude suggests updating low and high here based on selected difficulty at this moment. I like this thinking so I want to try it out. 
+    # Claude suggests . I like this thinking so I want to try it out. 
     low, high = get_range_for_difficulty(difficulty)        
+    # FIX: Updating low, high, and secret states here based on selected difficulty at this moment. Recommended from using agent mode
     st.session_state.low = low
     st.session_state.high = high
-
-    # CC Suggested check here for new secret only on new game select. I like this thinking.
     st.session_state.secret = random.randint(low, high)     
     
     st.session_state.attempt_limit = attempt_limit_map[difficulty]
@@ -165,12 +121,12 @@ if submit:
         secret = st.session_state.secret
 
         st.session_state.attempts += 1 
-        '''
-        Claude Code found an error that I didn't notice or consider. 
-        This was originally being incremented before the guess was parsed, 
-          meaning guesses would be wasted on an empty string submission. 
-        Moving it here ensures better user experience of not wasting 
-          guesses on invalid submissions.'''
+
+        # Claude Code found an error that I didn't notice or consider. 
+        # This was originally being incremented before the guess was parsed, 
+        #   meaning guesses would be wasted on an empty string submission. 
+        # Moving it here ensures better user experience of not wasting 
+        #   guesses on invalid submissions.
 
         outcome, message = check_guess(guess_int, secret)
 
