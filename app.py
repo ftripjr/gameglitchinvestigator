@@ -6,10 +6,10 @@ def get_range_for_difficulty(difficulty: str):
     if difficulty == "Easy":
         return 1, 20
     if difficulty == "Normal":
-        return 1, 100
+        return 1, 50 # Claude Code wants this set to 100. I could work with this but will work with 50 for now.
     if difficulty == "Hard":
-        return 1, 50
-    return 1, 100
+        return 1, 100 # Claude Code wants this set to 500 or 200. A bit excessive in my opinion, but I like the energy.
+    return 1, 50
 
 
 def parse_guess(raw: str):
@@ -36,16 +36,16 @@ def check_guess(guess, secret):
 
     try:
         if guess > secret:
-            return "Too High", "📈 Go HIGHER!"
+            return "Too High", "📉 Go LOWER!"       # Claude Code: Bug! Hints Inverted
         else:
-            return "Too Low", "📉 Go LOWER!"
+            return "Too Low", "📈 Go HIGHER!"       # Claude Code: Bug! Hints Inverted
     except TypeError:
         g = str(guess)
         if g == secret:
             return "Win", "🎉 Correct!"
         if g > secret:
-            return "Too High", "📈 Go HIGHER!"
-        return "Too Low", "📉 Go LOWER!"
+            return "Too High", "📉 Go LOWER"        # FT found following CC's logic
+        return "Too Low", "📈 Go HIGHER!"           # FT found following CC's logic
 
 # FIXME: Correct scoring logic. Score should be 100 if first attempt is correct. Score should never be negative.
 def update_score(current_score: int, outcome: str, attempt_number: int):
@@ -80,9 +80,9 @@ difficulty = st.sidebar.selectbox(
 
 # FIXME: Correct Attempt Limit for difficulty and default behavior
 attempt_limit_map = {
-    "Easy": 6,
+    "Easy": 10,   # a CC suggestion that I like
     "Normal": 8,
-    "Hard": 5,
+    "Hard": 5,    # cc said used 4 but i think that's too hard. CC appears to be a true gamer.
 }
 attempt_limit = attempt_limit_map[difficulty]
 
@@ -96,7 +96,7 @@ if "secret" not in st.session_state:
 
 # FIXME: Incorrect Attempts at app start
 if "attempts" not in st.session_state:
-    st.session_state.attempts = 1
+    st.session_state.attempts = 0 # Claude Code found this error and suggested the correction
 
 if "score" not in st.session_state:
     st.session_state.score = 0
@@ -111,7 +111,7 @@ st.subheader("Make a guess")
 
 # FIXME: Hard coded range for info. Should show low and high.
 st.info(
-    f"Guess a number between {low} and {high}. "
+    f"Guess a number between {low} and {high}. " # Claude Bug Fix: change 1 and 100 to low and high
     f"Attempts left: {attempt_limit - st.session_state.attempts}"
 )
 
@@ -138,7 +138,10 @@ with col3:
 # FIXME: New Game doesn't start new game. Make sure it takes into account selected difficulty
 if new_game:
     st.session_state.attempts = 0
-    st.session_state.secret = random.randint(1, 100)
+    st.session_state.status = "playing"                     # CC uses this line to correct the status of the game. LGTM!
+    low, high = get_range_for_difficulty(difficulty)        # Claude suggests updating low and high here based on selected difficulty. I like this thinking so I want to try it out.
+    st.session_state.secret = random.randint(low, high)     # CC Suggested check here for new secret only on new game select. I like this thinking.
+    st.session_state.score = 0 # 
     st.success("New game started.")
     st.rerun()
 
@@ -150,8 +153,6 @@ if st.session_state.status != "playing":
     st.stop()
 
 if submit:
-    st.session_state.attempts += 1
-
     ok, guess_int, err = parse_guess(raw_guess)
 
     if not ok:
@@ -164,6 +165,13 @@ if submit:
             secret = str(st.session_state.secret)
         else:
             secret = st.session_state.secret
+
+        st.session_state.attempts += 1 
+        # Claude Code found an error that I didn't notice or consider. 
+        # This was originally being incremented before the guess was parsed, 
+        #   meaning guesses would be wasted on an empty string submission. 
+        #   Moving it here ensures better user experience of not wasting 
+        #   guesses on words.
 
         outcome, message = check_guess(guess_int, secret)
 
