@@ -4,11 +4,13 @@
 
 Required:
 
-- [ ] Attempts start at 1 on app start instead of 0
-- [ ] Hints lie to player
-- [ ] Ranges and Guesses are not consistent with difficulty
-- [ ] Info block does not accurately show range based on difficulty selection. `1 to 100` is hard coded.
+- [x] Info block has `1 to 100` is hard coded instead of showing the range based on difficulty selection.
+- [x] Attempts start at 1 on app start instead of 0
+- [x] Hints lie to player
 
 Stretch Goals:
 
+- [x] History is not properly cleared on new game.
+- [x] Ranges and Guesses are not consistent with difficulty.
+- [ ] Guesses remaining are not consistent with submissions.
 - [ ] History is not properly updated with user submissions.

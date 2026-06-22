@@ -1,7 +1,6 @@
 import random
 import streamlit as st
 
-# FIXME: Correct Ranges for difficulty and default behavior
 def get_range_for_difficulty(difficulty: str):
     if difficulty == "Easy":
         return 1, 20
@@ -10,7 +9,6 @@ def get_range_for_difficulty(difficulty: str):
     if difficulty == "Hard":
         return 1, 100 # Claude Code wants this set to 500 or 200. A bit excessive in my opinion, but I like the energy.
     return 1, 50
-
 
 def parse_guess(raw: str):
     if raw is None:
@@ -29,23 +27,13 @@ def parse_guess(raw: str):
 
     return True, value, None
 
-# FIXME: Guess give hints in the wrong direction
 def check_guess(guess, secret):
     if guess == secret:
         return "Win", "🎉 Correct!"
-
-    try:
-        if guess > secret:
-            return "Too High", "📉 Go LOWER!"       # Claude Code: Bug! Hints Inverted
-        else:
-            return "Too Low", "📈 Go HIGHER!"       # Claude Code: Bug! Hints Inverted
-    except TypeError:
-        g = str(guess)
-        if g == secret:
-            return "Win", "🎉 Correct!"
-        if g > secret:
-            return "Too High", "📉 Go LOWER"        # FT found following CC's logic
-        return "Too Low", "📈 Go HIGHER!"           # FT found following CC's logic
+    elif guess > secret:
+        return "Too High", "📉 Go LOWER!"
+    else:
+        return "Too Low", "📈 Go HIGHER!"
 
 # FIXME: Correct scoring logic. Score should be 100 if first attempt is correct. Score should never be negative.
 def update_score(current_score: int, outcome: str, attempt_number: int):
@@ -78,15 +66,23 @@ difficulty = st.sidebar.selectbox(
     index=1,
 )
 
-# FIXME: Correct Attempt Limit for difficulty and default behavior
 attempt_limit_map = {
-    "Easy": 10,   # a CC suggestion that I like
+    "Easy": 10,
     "Normal": 8,
-    "Hard": 5,    # cc said used 4 but i think that's too hard. CC appears to be a true gamer.
+    "Hard": 5
 }
 attempt_limit = attempt_limit_map[difficulty]
 
 low, high = get_range_for_difficulty(difficulty)
+
+if "low" not in st.session_state:
+    st.session_state.low = low
+
+if "high" not in st.session_state:
+    st.session_state.high = high
+
+if "attempt_limit" not in st.session_state:
+    st.session_state.attempt_limit = attempt_limit
 
 st.sidebar.caption(f"Range: {low} to {high}")
 st.sidebar.caption(f"Attempts allowed: {attempt_limit}")
@@ -94,9 +90,8 @@ st.sidebar.caption(f"Attempts allowed: {attempt_limit}")
 if "secret" not in st.session_state:
     st.session_state.secret = random.randint(low, high)
 
-# FIXME: Incorrect Attempts at app start
 if "attempts" not in st.session_state:
-    st.session_state.attempts = 0 # Claude Code found this error and suggested the correction
+    st.session_state.attempts = 0 
 
 if "score" not in st.session_state:
     st.session_state.score = 0
@@ -109,10 +104,9 @@ if "history" not in st.session_state:
 
 st.subheader("Make a guess")
 
-# FIXME: Hard coded range for info. Should show low and high.
 st.info(
-    f"Guess a number between {low} and {high}. " # Claude Bug Fix: change 1 and 100 to low and high
-    f"Attempts left: {attempt_limit - st.session_state.attempts}"
+    f"Guess a number between {st.session_state.low} and {st.session_state.high}. "
+    f"Attempts left: {st.session_state.attempt_limit - st.session_state.attempts}"
 )
 
 with st.expander("Developer Debug Info"):
@@ -135,13 +129,21 @@ with col2:
 with col3:
     show_hint = st.checkbox("Show hint", value=True)
 
-# FIXME: New Game doesn't start new game. Make sure it takes into account selected difficulty
 if new_game:
+    st.session_state.status = "playing"
+
+    # Claude suggests updating low and high here based on selected difficulty at this moment. I like this thinking so I want to try it out. 
+    low, high = get_range_for_difficulty(difficulty)        
+    st.session_state.low = low
+    st.session_state.high = high
+
+    # CC Suggested check here for new secret only on new game select. I like this thinking.
+    st.session_state.secret = random.randint(low, high)     
+    
+    st.session_state.attempt_limit = attempt_limit_map[difficulty]
     st.session_state.attempts = 0
-    st.session_state.status = "playing"                     # CC uses this line to correct the status of the game. LGTM!
-    low, high = get_range_for_difficulty(difficulty)        # Claude suggests updating low and high here based on selected difficulty. I like this thinking so I want to try it out.
-    st.session_state.secret = random.randint(low, high)     # CC Suggested check here for new secret only on new game select. I like this thinking.
-    st.session_state.score = 0 # 
+    st.session_state.score = 0
+    st.session_state.history = []
     st.success("New game started.")
     st.rerun()
 
@@ -160,18 +162,15 @@ if submit:
         st.error(err)
     else:
         st.session_state.history.append(guess_int)
-
-        if st.session_state.attempts % 2 == 0:
-            secret = str(st.session_state.secret)
-        else:
-            secret = st.session_state.secret
+        secret = st.session_state.secret
 
         st.session_state.attempts += 1 
-        # Claude Code found an error that I didn't notice or consider. 
-        # This was originally being incremented before the guess was parsed, 
-        #   meaning guesses would be wasted on an empty string submission. 
-        #   Moving it here ensures better user experience of not wasting 
-        #   guesses on words.
+        '''
+        Claude Code found an error that I didn't notice or consider. 
+        This was originally being incremented before the guess was parsed, 
+          meaning guesses would be wasted on an empty string submission. 
+        Moving it here ensures better user experience of not wasting 
+          guesses on invalid submissions.'''
 
         outcome, message = check_guess(guess_int, secret)
 
@@ -192,7 +191,7 @@ if submit:
                 f"Final score: {st.session_state.score}"
             )
         else:
-            if st.session_state.attempts >= attempt_limit:
+            if st.session_state.attempts >= st.session_state.attempt_limit:
                 st.session_state.status = "lost"
                 st.error(
                     f"Out of attempts! "
