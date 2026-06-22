@@ -2,7 +2,7 @@
 
 Here are the logs of my Claude Code sessions for each bug fix. I marked the "crime scenes" in the code with  `# FIXME: Logic breaks here` tags where I thought the logic may be incorrect and need fixing.
 
-# Rough Start with a Wasted Guess 🫤❔
+## Rough Start with a Wasted Guess 🫤❔
 
 The app starts attempts for the game at 1 instead of 0. Why?
 
@@ -18,7 +18,7 @@ st.session_state.attempts = 0
 
 Off-by-one bug. Code's already marked it (line 97 FIXME comment).
 
-# Stale Info ❗
+## Stale Info ❗
 
 FT: "Info block does not accurately show range based on difficulty selection. `1 to 100` is hard coded. How can I ensure the info block updates based on the selected difficulty of the game?"
 
@@ -28,7 +28,7 @@ CC: `Read game-glitch-investigator\investigate-and-repair.md`
 Line 113-116 has hardcoded 1 and 100 in info block. Already computed low, high on line 89 — use those:
 
 `Edit game-glitch-investigator\app.py`
-- `Modified`
+`Modified`
 
 ```python
 st.info(
@@ -38,7 +38,7 @@ st.info(
 ```
 
 `Edit game-glitch-investigator\investigate-and-repair.md`
-- `Modified`
+`Modified`
 
 Done. Info block now shows {low} and {high} instead of hardcoded 1 and 100. Pulls from difficulty via get_range_for_difficulty().
 
@@ -208,19 +208,19 @@ Claude Code (CC) with code formatting by FT: "Looking at app.py, found three bug
 
 1. **Invalid guesses increment attempts** (line 148)
 
-- st.session_state.attempts += 1 happens BEFORE parse_guess() check
-- Invalid input wastes an attempt AND still appends to history
-- Move increment into the else block (only on valid guesses)
+    - st.session_state.attempts += 1 happens BEFORE parse_guess() check
+    - Invalid input wastes an attempt AND still appends to history
+    - Move increment into the else block (only on valid guesses)
 
 2. **History not reset on new game** (line 135-138)
 
-- new_game doesn't clear history
-- Should add: st.session_state.history = []
+    - new_game doesn't clear history
+    - Should add: st.session_state.history = []
 
 3. **Attempts starts at 1 not 0** (line 96)
 
-- First guess becomes attempt #2 on initial load
-- Should be st.session_state.attempts = 0
+    - First guess becomes attempt #2 on initial load
+    - Should be st.session_state.attempts = 0
 
 Fix these:
 
@@ -255,7 +255,7 @@ FT: "Please explain the underlying logic of these three bugs you found."
 
 CC:
 
-**Bug 1: Invalid guesses increment attempts**
+Bug 1: Invalid guesses increment attempts
 Flow breakdown:
 
 ```markdown
@@ -268,7 +268,7 @@ User submits "abc"
 
 Root cause: increment happens unconditionally before validity check. Treat invalid input as wasted attempt + history pollution.
 
-**Bug 2: History not reset on new game**
+Bug 2: History not reset on new game
 
 Flow:
 
@@ -283,7 +283,7 @@ Game 2: guess [3, 7] → history = [5, 10, 15, 3, 7]  (mixed games!)
 
 Root cause: new_game resets state selectively. Forgets history = accumulated list of ALL guesses ever, not per-game. Without explicit clear, old entries persist.
 
-**Bug 3: Attempts starts at 1 not 0**
+Bug 3: Attempts starts at 1 not 0
 
 Flow:
 
@@ -310,12 +310,14 @@ CC: Looking at the history append code:
 
 Lines 152-156 is where guesses enter history:
 
-
+```python
 if not ok:
     st.session_state.history.append(raw_guess)  # Invalid guess (line 153)
     st.error(err)
 else:
     st.session_state.history.append(guess_int)   # Valid guess (line 156)
+```
+
 Current logic:
 
 Line 147: if submit: triggers when button clicked
@@ -327,15 +329,19 @@ Both branches execute append. Code structure should process every submission.
 
 BUT — I notice attempts increments BEFORE validation (line 148). Combined with line 158's even/odd check:
 
-
+```python
 if st.session_state.attempts % 2 == 0:
     secret = str(st.session_state.secret)  # Becomes string on EVEN attempts
+```
+
 This creates alternating behavior: even attempts convert secret to string, odd attempts keep it as int. Maybe this is causing the "every other" pattern?
 
 Also, the text_input key (line 123) changes if difficulty changes:
 
-
+```python
 key=f"guess_input_{difficulty}"
+```
+
 If you change difficulty, Streamlit creates new widget, resets input to empty. Next submit with empty input would fail parse_guess.
 
 What exactly are you seeing when you submit? Does history list stay blank, or does it show only some guesses?
@@ -370,8 +376,9 @@ Root cause: Text_input persists its value between submissions. This is confusing
 
 Fix: Clear text input after valid submission. Use Streamlit form syntax instead of loose button:
 
-
+```python
 with st.form("guess_form"):
     raw_guess = st.text_input("Enter your guess:")
     submit = st.form_submit_button("Submit Guess 🚀")
 Forms auto-clear the input on successful submit, preventing the state confusion.
+```
