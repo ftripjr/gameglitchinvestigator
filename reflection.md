@@ -50,42 +50,56 @@ Run # 3
 
 So the bugs appear to be:
 
-- [ ] on app startup, we have attempts being incorrect
-- [ ] Hints lie
-- [ ] Banner for attempts and range based on difficulty does not update
-- [ ] History doesn't properly update on guess submission
-- [ ] Ranges and Guesses are not consistent with difficulty
-  - [ ] Easy -> Smallest Range (1,20), Most Guesses (8)
-  - [ ] Normal -> Medium Range (1,50), "Normal" Guesses (6)
-  - [ ] Hard -> Largest Range (1,100), Least Guesses (5)
-- [ ] Score System is bugged.
+Required:
+
+- [ ] Hints lie to player
+- [ ] Attempts start at 1 on app start instead of 0
+- [ ] Info Banner does not update
+  - [ ] Info block has `1 to 100` is hard coded instead of showing the range based on difficulty selection.
 - [ ] new game button does not appear to properly create new games
+  - [ ] new game does not begin after a game has been completed
   - [ ] history not cleared
-  - [ ] will not allow a new game to begin after a game has been completed
   - [ ] on successful game generation, range does not update based on difficulty
+- [ ] History is not properly cleared on new game.
+- [ ] Ranges and Guesses are not consistent with difficulty
+  - [ ] "Easy" -> Smallest Range (1,20) and Most Guesses (8)
+  - [ ] "Normal" -> Medium Range (1,50) and Medium Guesses (6)
+  - [ ] "Hard" -> Largest Range (1,100) and Least Guesses (5)
+- [ ] Guesses remaining are not consistent with submissions.
+- [ ] History is not properly updated with user submissions.
+- [ ] Score System is bugged.
 
 ---
 
 ## 2. How did you use AI as a teammate?
 
-- Which AI tools did you use on this project (for example: ChatGPT, Gemini, Copilot)?
-- Give one example of an AI suggestion that was correct (including what the AI suggested and how you verified the result).
-- Give one example of an AI suggestion that was incorrect or misleading (including what the AI suggested and how you verified the result).
-
 I used Claude Code to help me fix the following glitches:
 
 Required:
 
-- [ ] Hints lie
-- [ ] Ranges and Guesses are not consistent with difficulty
-- [ ] Banner for attempts and range based on difficulty does not update
+- [x] Hints lie to player
+- [x] Attempts start at 1 on app start instead of 0
+- [x] Info Banner does not update
+  - [x] Info block has `1 to 100` is hard coded instead of showing the range based on difficulty selection.
+- [x] new game button does not appear to properly create new games
+  - [x] new game does not begin after a game has been completed
+  - [x] history not cleared
+  - [x] on successful game generation, range does not update based on difficulty
 
-Stretch Goal:
-- [ ] new game button does not appear to properly create new games
-  - [ ] will not allow a new game to begin after a game has been completed
-  - [ ] on successful game generation, range does not update based on difficulty
-  - [ ] history not cleared
-- [ ] History doesn't properly update on guess submission
+Stretch Goals:
+
+- [x] History is not properly cleared on new game.
+- [x] Ranges and Guesses are not consistent with difficulty
+  - [x] "Easy" -> Smallest Range (1,20) and Most Guesses (8)
+  - [x] "Normal" -> Medium Range (1,50) and Medium Guesses (6)
+  - [x] "Hard" -> Largest Range (1,100) and Least Guesses (5)
+- [ ] Guesses remaining are not consistent with submissions.
+- [ ] History is not properly updated with user submissions.
+- [ ] Score System is bugged.
+
+Claude Code had a pretty easy time correcting almost all the "required" bugs. It easily dealt with recognizing when values that needed to be dynamic were hard-coded and findig off by one errors like with the attempts value on startup. But neither Claude Code nor I was able to figure out  how to correct the history submission bug that should have updated the history of the game on submission of a guess.
+
+My conversations with Claude Code can be found in [`ai_interactions.md`](/ai_interactions.md)
 
 ---
 
