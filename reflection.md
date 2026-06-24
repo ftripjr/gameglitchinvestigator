@@ -8,11 +8,9 @@ The game had a few incorrect implementations for the game's logic and UI. On app
 
 Also something I noticed after peer review, the ranges are larger in normal than for hard and the guesses don't seem to be consistent based on difficulty. That should probably change!
 
-**Bug Reproduction Log**
+### **Bug Reproduction Log**
 
-Document at least 3 bugs you found. Add rows as needed.
-
-Run #1 
+#### Run #1
 
 |         Input          |  Expected Behavior  |    Actual Behavior    |               Console Output / Error                 |
 |------------------------|---------------------|-----------------------|------------------------------------------------------|
@@ -27,7 +25,7 @@ Run #1
 |   "New Game" pressed   |     history clear   |   history unchanged   |                    no errors shown                   |
 |   "New Game" pressed   |  Alert disappears.  | Banner still visible. |                    no errors shown                   |
 
-Run #2
+#### Run #2
 
 |         Input          |  Expected Behavior  |    Actual Behavior    |               Console Output / Error                 |
 |------------------------|---------------------|-----------------------|------------------------------------------------------|
@@ -37,7 +35,7 @@ Run #2
 |   "New Game" pressed   |     history clear   |   history unchanged   |                    no errors shown                   |
 |   "New Game" pressed   |  Alert disappears.  | Banner still visible. |                    no errors shown                   |
 
-Run # 3
+#### Run # 3
 
 |         Input          |  Expected Behavior  |    Actual Behavior    |               Console Output / Error                 |
 |------------------------|---------------------|-----------------------|------------------------------------------------------|
@@ -45,12 +43,9 @@ Run # 3
 |   "Easy" Difficulty    |   Difficulty: Easy  | Winner alert changed. |inject.js:254 Uncaught TypeError: e.target.className.indexOf is not a function at HTMLDocument.mouseup (inject.js:254:67)|
 |   "New Game" pressed   |      Score: 0     |       Score: 80       |                    no errors shown                   |
 |   "New Game" pressed   |     history clear   |   history unchanged   |                    no errors shown                   |
-|   "New Game" pressed   |  Alert disappears.  | Banner still visible. |                    no errors shown                   |ame.indexOf is not a function at HTMLDocument.mouseup (inject.js:254:67)|
-
+|   "New Game" pressed   |  Alert disappears.  | Banner still visible. |                    no errors shown                   |
 
 So the bugs appear to be:
-
-Required:
 
 - [ ] Hints lie to player
 - [ ] Attempts start at 1 on app start instead of 0
@@ -60,6 +55,7 @@ Required:
   - [ ] new game does not begin after a game has been completed
   - [ ] history not cleared
   - [ ] on successful game generation, range does not update based on difficulty
+- [ ] Score System is bugged.
 - [ ] History is not properly cleared on new game.
 - [ ] Ranges and Guesses are not consistent with difficulty
   - [ ] "Easy" -> Smallest Range (1,20) and Most Guesses (8)
@@ -67,7 +63,6 @@ Required:
   - [ ] "Hard" -> Largest Range (1,100) and Least Guesses (5)
 - [ ] Guesses remaining are not consistent with submissions.
 - [ ] History is not properly updated with user submissions.
-- [ ] Score System is bugged.
 
 ---
 
@@ -85,6 +80,7 @@ Required:
   - [x] new game does not begin after a game has been completed
   - [x] history not cleared
   - [x] on successful game generation, range does not update based on difficulty
+- [x] Score System is bugged.
 
 Stretch Goals:
 
@@ -95,20 +91,14 @@ Stretch Goals:
   - [x] "Hard" -> Largest Range (1,100) and Least Guesses (5)
 - [ ] Guesses remaining are not consistent with submissions.
 - [ ] History is not properly updated with user submissions.
-- [ ] Score System is bugged.
 
-CC had a pretty easy time correcting almost all the "required" bugs. It easily dealt with recognizing when values that needed to be dynamic were hard-coded and findig off by one errors like with the attempts value on startup. But neither CC nor I was able to figure out  how to correct the history submission bug that should have updated the history of the game on submission of a guess.
+CC had a pretty easy time correcting almost all the "required" bugs. It easily dealt with recognizing when values that needed to be dynamic were hard-coded and findig off by one errors like with the attempts value on startup. But neither CC nor I was able to figure out  how to correct the history submission bug that should have updated the history of the game on submission of a guess. Claude Code found an error that I didn't notice or consider. This was originally being incremented before the guess was parsed, meaning guesses would be wasted on an empty string submission. Moving it inside the else ensures better user experience of not wasting guesses on invalid submissions.
 
 My conversations with CC can be found in [`ai_interactions.md`](/ai_interactions.md)
 
 ---
 
 ## 3. Debugging and testing your fixes
-
-- How did you decide whether a bug was really fixed?
-- Describe at least one test you ran (manual or using pytest)  
-  and what it showed you about your code.
-- Did AI help you design or understand any tests? How?
 
 When testing the bugs that were suggested and input by CC, I would repeat the tests I used to generate the error. If I noticed that the behaviors and errors were corrected, I'd considered the bug fixed. One test was validating the change of range based on the selection of the difficulty at the start of a new game. First, I implemented a change that would change the info element on any selection of the difficulty. Afterwards, I noted to CC that it'd be better to track that in the session state instead of on any user selection because it made the game more stable. CC Agreeed (hopefully not just because its a yes-bot) and validated the changes that I input and tested myself. CC also helped me understand Streamlit by giving me an overview of how Streamlit uses sessions and states to persist data between interactions before I implemented any changes to the starter project.
 
@@ -123,10 +113,5 @@ In Streamlit, every user interaction re-runs your entire script from top to bott
 ---
 
 ## 5. Looking ahead: your developer habits
-
-- What is one habit or strategy from this project that you want to reuse in future labs or projects?
-  - This could be a testing habit, a prompting strategy, or a way you used Git.
-- What is one thing you would do differently next time you work with AI on a coding task?
-- In one or two sentences, describe how this project changed the way you think about AI generated code.
 
 One thing I definitely will use CC for in future projects is creation of pytests for my functions. I need more practice with creating tests so this feature will be of great use. I also want to use it as a sanity check when I get stuck on a glitch and can't bother any other peer devs. It seems like a great tool to assist in creating code when you know how to use and correct it.
