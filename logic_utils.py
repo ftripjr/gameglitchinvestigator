@@ -47,18 +47,15 @@ def check_guess(guess, secret):
         return "Too Low", "📈 Go HIGHER!"
 
 # FIX: Refactored logic into logic_utils.py using agent mode
-def update_score(current_score: int, outcome: str, attempt_number: int):
-    """Update score based on outcome and attempt number."""
-    # FIXME: Score should be 100 if first attempt correct. Score should never be negative.
+def update_score(current_score: int, outcome: str):
+    """Update score based on outcome."""
     if outcome == "Win":
-        points = 100 - 10 * (attempt_number + 1)
+        points = 100 - abs(current_score)
         if points < 10:
             points = 10
-        return current_score + points
+        return points
 
     if outcome == "Too High":
-        if attempt_number % 2 == 0:
-            return current_score + 5
         return current_score - 5
 
     if outcome == "Too Low":
