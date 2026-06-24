@@ -12,6 +12,7 @@ Required:
   - [x] new game does not begin after a game has been completed
   - [x] history not cleared
   - [x] on successful game generation, range does not update based on difficulty
+- [x] Score System is bugged.
 
 Stretch Goals:
 
@@ -22,4 +23,3 @@ Stretch Goals:
   - [x] "Hard" -> Largest Range (1,100) and Least Guesses (5)
 - [ ] Guesses remaining are not consistent with submissions.
 - [ ] History is not properly updated with user submissions.
-- [ ] Score System is bugged.

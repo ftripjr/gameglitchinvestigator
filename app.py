@@ -122,12 +122,6 @@ if submit:
 
         st.session_state.attempts += 1 
 
-        # Claude Code found an error that I didn't notice or consider. 
-        # This was originally being incremented before the guess was parsed, 
-        #   meaning guesses would be wasted on an empty string submission. 
-        # Moving it here ensures better user experience of not wasting 
-        #   guesses on invalid submissions.
-
         outcome, message = check_guess(guess_int, secret)
 
         if show_hint:
@@ -135,8 +129,7 @@ if submit:
 
         st.session_state.score = update_score(
             current_score=st.session_state.score,
-            outcome=outcome,
-            attempt_number=st.session_state.attempts,
+            outcome=outcome
         )
 
         if outcome == "Win":
